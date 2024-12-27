@@ -43,7 +43,7 @@ export default async function handler(req, res) {
                     maxAge: 3600,                    
                     path: "/",                       // Available for the entire domain
                     sameSite: "None",                // Crucial for cross-origin requests
-                    domain: ".vercel.app",           // Set the domain to the root domain
+                    domain: "vercel.app",           // Set the domain to the root domain
                 })
             );
             
