@@ -1,11 +1,8 @@
-import axios from 'axios';
-import jwt from 'jsonwebtoken';
-import cookie from 'cookie'; 
-import dotenv from 'dotenv';
+import axios from "axios";
+import jwt from "jsonwebtoken";
+import cookie from "cookie";
 
-dotenv.config();
-
-export default async function handler(req, res) {
+export default async function callback(req, res) {
     if (req.method !== "GET") {
         return res.status(405).json({ message: "Method not allowed" });
     }
@@ -17,6 +14,7 @@ export default async function handler(req, res) {
     }
 
     try {
+        // Exchange the auth code for a token
         const response = await axios.post("https://iitdoauth.vercel.app/api/auth/resource", {
             client_id: process.env.CLIENT_ID,
             client_secret: process.env.CLIENT_SECRET,
@@ -26,23 +24,31 @@ export default async function handler(req, res) {
         });
 
         if (response.status === 200) {
+            // Create a signed JWT token
             const token = jwt.sign(
                 { user: response.data.user },
                 process.env.APP_SECRET,
                 { expiresIn: "1h" }
             );
+
+            // Set the cookie with proper attributes for cross-origin requests
             res.setHeader(
                 "Set-Cookie",
                 cookie.serialize("token", token, {
-                  httpOnly: true,
-                  secure: process.env.NODE_ENV === "production", // Ensure cookies are secure in production
-                  sameSite: "None", // Required for cross-origin cookies
-                  path: "/",
-                  maxAge: 3600, // 1 hour
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === "production", // Use HTTPS in production
+                    sameSite: "None", // Required for cross-origin cookies
+                    path: "/", // Available throughout the site
+                    maxAge: 3600, // Cookie valid for 1 hour
                 })
-              );
-              
-            return res.redirect(process.env.REDIRECT_URL);
+            );
+
+            // Allow the frontend to receive the cookie
+            res.setHeader("Access-Control-Allow-Origin", "https://your-frontend.vercel.app"); // Replace with your frontend domain
+            res.setHeader("Access-Control-Allow-Credentials", "true");
+
+            // Redirect the user back to the frontend
+            return res.redirect("https://your-frontend.vercel.app"); // Replace with your frontend URL
         } else {
             console.error("Error during authentication:", response.data.message);
             return res.status(response.status).json({ message: "Error during authentication." });
