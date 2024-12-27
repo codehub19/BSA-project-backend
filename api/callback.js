@@ -1,6 +1,6 @@
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
-import cookie from 'cookie'; // To handle cookies in serverless functions
+import cookie from 'cookie'; 
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -42,7 +42,7 @@ export default async function handler(req, res) {
                 })
             );
 
-            return res.redirect("http://localhost:5173/");
+            return res.redirect(process.env.REDIRECT_URL);
         } else {
             console.error("Error during authentication:", response.data.message);
             return res.status(response.status).json({ message: "Error during authentication." });
