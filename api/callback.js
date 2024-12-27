@@ -35,15 +35,15 @@ export default async function handler(req, res) {
             res.setHeader('Access-Control-Allow-Origin', process.env.REDIRECT_URL);
             res.setHeader('Access-Control-Allow-Credentials', 'true');
 
-            res.setHeader(
-                "Set-Cookie",
-                cookie.serialize("token", token, {
-                    httpOnly: true,
-                    secure: process.env.NODE_ENV === "production",
-                    maxAge: 3600, // 1 hour
-                    path: "/",
-                })
-            );
+            res.setHeader("Set-Cookie", cookie.serialize("token", token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production", 
+                maxAge: 3600,  // 1 hour
+                path: "/",
+                sameSite: "None",
+                domain: "bsa-project-ivory.vercel.app" 
+            }));
+            
 
             return res.redirect(process.env.REDIRECT_URL);
         } else {
