@@ -31,24 +31,18 @@ export default async function handler(req, res) {
                 process.env.APP_SECRET,
                 { expiresIn: "1h" }
             );
-            
-            res.setHeader('Access-Control-Allow-Origin', process.env.REDIRECT_URL);
-            res.setHeader('Access-Control-Allow-Credentials', 'true');
-
             res.setHeader(
                 "Set-Cookie",
                 cookie.serialize("token", token, {
-                    httpOnly: true,                
-                    secure: process.env.NODE_ENV === "production", 
-                    maxAge: 3600,                    
+                    httpOnly: true,                  // Prevent client-side JS from accessing the cookie
+                    secure: process.env.NODE_ENV === "production",  // Ensure cookie is sent over HTTPS in production
+                    maxAge: 3600,                    // Cookie expiration (1 hour)
                     path: "/",                       // Available for the entire domain
                     sameSite: "None",                // Crucial for cross-origin requests
-                    domain: "vercel.app",           // Set the domain to the root domain
                 })
             );
             
             
-
             return res.redirect(process.env.REDIRECT_URL);
         } else {
             console.error("Error during authentication:", response.data.message);
