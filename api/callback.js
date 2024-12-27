@@ -32,24 +32,11 @@ export default async function handler(req, res) {
                 { expiresIn: "1h" }
             );
             
-            res.setHeader('Access-Control-Allow-Origin', process.env.REDIRECT_URL);
-            res.setHeader('Access-Control-Allow-Credentials', 'true');
+            const redirectUrl = process.env.NODE_ENV === "production"
+            ? `https://bsa-project-ivory.vercel.app/loading/${token}` // Production redirect URL
+            : `http://localhost:5173/loading/${token}`;
 
-            res.setHeader(
-                "Set-Cookie",
-                cookie.serialize("token", token, {
-                    httpOnly: true,                
-                    secure: process.env.NODE_ENV === "production", 
-                    maxAge: 3600,                    
-                    path: "/",                       // Available for the entire domain
-                    sameSite: "None",                // Crucial for cross-origin requests
-                    domain: "vercel.app",           // Set the domain to the root domain
-                })
-            );
-            
-            
-
-            return res.redirect(process.env.REDIRECT_URL);
+        return res.redirect(redirectUrl); 
         } else {
             console.error("Error during authentication:", response.data.message);
             return res.status(response.status).json({ message: "Error during authentication." });
