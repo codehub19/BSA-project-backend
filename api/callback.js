@@ -34,7 +34,7 @@ export default async function handler(req, res) {
             res.setHeader(
                 "Set-Cookie",
                 cookie.serialize("token", token, {             
-                    secure: false, 
+                    secure: true, 
                     maxAge: 3600,                    
                     domain: "https://bsa-project-ivory.vercel.app",
                     path: "/",                       
