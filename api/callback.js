@@ -1,15 +1,15 @@
-import express from 'express';
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
-import cookieParser from 'cookie-parser';
+import cookie from 'cookie'; // To handle cookies in serverless functions
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const app = express();
-app.use(cookieParser());
+export default async function handler(req, res) {
+    if (req.method !== "GET") {
+        return res.status(405).json({ message: "Method not allowed" });
+    }
 
-app.get("/callback", async (req, res) => {
     const { code, state } = req.query;
 
     if (!code || !state) {
@@ -31,8 +31,18 @@ app.get("/callback", async (req, res) => {
                 process.env.APP_SECRET,
                 { expiresIn: "1h" }
             );
-            res.cookie("token", token);
-            return res.redirect("http://localhost:5173/"); 
+
+            res.setHeader(
+                "Set-Cookie",
+                cookie.serialize("token", token, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === "production",
+                    maxAge: 3600, // 1 hour
+                    path: "/",
+                })
+            );
+
+            return res.redirect("http://localhost:5173/");
         } else {
             console.error("Error during authentication:", response.data.message);
             return res.status(response.status).json({ message: "Error during authentication." });
@@ -41,10 +51,4 @@ app.get("/callback", async (req, res) => {
         console.error("Error during OAuth callback:", err.message || err);
         return res.status(500).json({ message: "Internal Server Error." });
     }
-});
-
-
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running at http://localhost:${PORT}`);
-});
+}
