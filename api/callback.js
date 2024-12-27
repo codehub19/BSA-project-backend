@@ -31,7 +31,17 @@ export default async function handler(req, res) {
                 process.env.APP_SECRET,
                 { expiresIn: "1h" }
             );
-            res.cookie("token", token);
+            res.setHeader(
+                "Set-Cookie",
+                cookie.serialize("token", token, {
+                  httpOnly: true,
+                  secure: process.env.NODE_ENV === "production", // Ensure cookies are secure in production
+                  sameSite: "None", // Required for cross-origin cookies
+                  path: "/",
+                  maxAge: 3600, // 1 hour
+                })
+              );
+              
             return res.redirect(process.env.REDIRECT_URL);
         } else {
             console.error("Error during authentication:", response.data.message);
