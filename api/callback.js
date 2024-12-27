@@ -33,12 +33,12 @@ export default async function handler(req, res) {
             );
             res.setHeader(
                 "Set-Cookie",
-                cookie.serialize("token", token, {
-                    httpOnly: true,                  // Prevent client-side JS from accessing the cookie
-                    secure: process.env.NODE_ENV === "production",  // Ensure cookie is sent over HTTPS in production
-                    maxAge: 3600,                    // Cookie expiration (1 hour)
-                    path: "/",                       // Available for the entire domain
-                    sameSite: "None",                // Crucial for cross-origin requests
+                cookie.serialize("token", token, {             
+                    secure: false, 
+                    maxAge: 3600,                    
+                    domain: "https://bsa-project-ivory.vercel.app",
+                    path: "/",                       
+                    sameSite: "None",               
                 })
             );
             
